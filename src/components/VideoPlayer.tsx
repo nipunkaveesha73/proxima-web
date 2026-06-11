@@ -3,19 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
-import { X, AlertCircle, Loader } from 'lucide-react';
-import { Movie } from '../types';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useEffect } from "react";
+import { X, AlertCircle, Loader } from "lucide-react";
+import { Movie } from "../types";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  checkMovieAvailability,
+  checkEpisodeAvailability,
+  getTVEmbedUrl,
+  getMovieEmbedUrl,
+} from "../api/vidking";
 
 interface VideoPlayerProps {
   movie: Movie;
   isOpen: boolean;
   onClose: () => void;
-  mediaType?: 'movie' | 'tv';
+  mediaType?: "movie" | "tv";
 }
 
-export default function VideoPlayer({ movie, isOpen, onClose, mediaType = 'movie' }: VideoPlayerProps) {
+export default function VideoPlayer({
+  movie,
+  isOpen,
+  onClose,
+  mediaType = "movie",
+}: VideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [season, setSeason] = useState(1);
@@ -23,10 +34,10 @@ export default function VideoPlayer({ movie, isOpen, onClose, mediaType = 'movie
 
   // Build vidsrc URL based on media type
   const getVideoUrl = () => {
-    if (mediaType === 'tv') {
-      return `https://vidsrc.xyz/embed/tv/${movie.id}/${season}/${episode}`;
+    if (mediaType === "tv") {
+      return getTVEmbedUrl(movie.id, season, episode);
     }
-    return `https://vidsrc.xyz/embed/movie/${movie.id}`;
+    return getMovieEmbedUrl(movie.id);
   };
 
   const videoUrl = getVideoUrl();
@@ -41,7 +52,7 @@ export default function VideoPlayer({ movie, isOpen, onClose, mediaType = 'movie
   };
 
   const handleIframeError = () => {
-    setError('Unable to load video. The video might not be available.');
+    setError("Unable to load video. The video might not be available.");
     setIsLoading(false);
   };
 
@@ -65,7 +76,9 @@ export default function VideoPlayer({ movie, isOpen, onClose, mediaType = 'movie
         >
           {/* Header */}
           <div className="bg-surface-container-high p-4 md:p-6 flex items-center justify-between border-b border-outline-variant/20">
-            <h2 className="text-lg md:text-xl font-bold truncate">{movie.title}</h2>
+            <h2 className="text-lg md:text-xl font-bold truncate">
+              {movie.title}
+            </h2>
             <button
               onClick={onClose}
               className="p-2 hover:bg-surface-container-highest rounded-lg transition-colors"
@@ -111,7 +124,7 @@ export default function VideoPlayer({ movie, isOpen, onClose, mediaType = 'movie
           </div>
 
           {/* Controls for TV Shows */}
-          {mediaType === 'tv' && (
+          {mediaType === "tv" && (
             <div className="bg-surface-container-high p-4 md:p-6 border-t border-outline-variant/20 space-y-4">
               <div className="grid grid-cols-2 gap-4 md:flex md:gap-8">
                 <div className="space-y-2">
@@ -128,7 +141,11 @@ export default function VideoPlayer({ movie, isOpen, onClose, mediaType = 'movie
                     className="w-full px-3 py-2 bg-surface-container border border-outline-variant/30 rounded-lg text-sm font-medium hover:border-primary/50 focus:border-primary focus:outline-none transition-colors text-white"
                   >
                     {Array.from({ length: 5 }, (_, i) => i + 1).map((s) => (
-                      <option key={s} value={s} className="bg-surface-dim text-white">
+                      <option
+                        key={s}
+                        value={s}
+                        className="bg-surface-dim text-white"
+                      >
                         Season {s}
                       </option>
                     ))}
@@ -149,7 +166,11 @@ export default function VideoPlayer({ movie, isOpen, onClose, mediaType = 'movie
                     className="w-full px-3 py-2 bg-surface-container border border-outline-variant/30 rounded-lg text-sm font-medium hover:border-primary/50 focus:border-primary focus:outline-none transition-colors text-white"
                   >
                     {Array.from({ length: 10 }, (_, i) => i + 1).map((e) => (
-                      <option key={e} value={e} className="bg-surface-dim text-white">
+                      <option
+                        key={e}
+                        value={e}
+                        className="bg-surface-dim text-white"
+                      >
                         Episode {e}
                       </option>
                     ))}
@@ -164,8 +185,14 @@ export default function VideoPlayer({ movie, isOpen, onClose, mediaType = 'movie
 
           {/* Info */}
           <div className="px-4 md:px-6 py-4 bg-surface-container-low border-t border-outline-variant/20 text-sm text-on-surface-variant space-y-2">
-            <p>🎬 Powered by <span className="font-semibold text-primary">vidsrc</span></p>
-            <p className="text-xs">If the video fails to load, try refreshing the page or switching episodes.</p>
+            <p>
+              🎬 Powered by{" "}
+              <span className="font-semibold text-primary">Vidking</span>
+            </p>
+            <p className="text-xs">
+              If the video fails to load, try refreshing the page or switching
+              episodes.
+            </p>
           </div>
         </motion.div>
       </motion.div>
